@@ -6,6 +6,12 @@ import requests as req
 from pandas import DataFrame
 from getpass import getpass
 
+# import kivy
+# kivy.require('1.0.6') # replace with your current kivy version !
+# from kivy.app import App
+# from kivy.uix.label import Label
+
+
 # TODO: setup GUI to get input and display table of results; 
 # See kivy for GUI: https://kivy.org/doc/stable/gettingstarted/installation.html
 # TODO: install password store and configure client environment to use password store
@@ -118,7 +124,7 @@ class registry(object):
             print(f'\nThe environment variable {err} does not match any found in our system.\n')
         except Exception as err: # last line of defense
             print('\nAn exception has occured.\n\n{}'.format(err))
-            
+
     #####################################################################
 #########################################################################
 if __name__ == '__main__':

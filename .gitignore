@@ -1,0 +1,6 @@
+.vscode
+.idea
+.cache
+.config
+kivy_venv
+.scratch
