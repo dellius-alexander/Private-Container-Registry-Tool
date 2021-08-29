@@ -6,6 +6,8 @@ from getpass import getpass
 import re
 import time
 
+from requests.exceptions import Timeout
+
 # TODO: setup GUI to get input and display table of results; 
 # See kivy for GUI: https://kivy.org/doc/stable/gettingstarted/installation.html
 # TODO: install password store and configure client environment to use password store
@@ -14,8 +16,8 @@ import time
 
 class registry(object):
     #####################################################################
-    def __init__(self, url=None,username=None,passenv=None,passwd=str) -> None:
-        self.url = url
+    def __init__(self, raw_url=None,username=None,passenv=None,passwd=str) -> None:
+        self.url = raw_url
         self.username = username
         self.passenv = passenv
         self.passwd = passwd
@@ -23,19 +25,19 @@ class registry(object):
         # super().__init__()
 
     #####################################################################    
-    def get_registry(self,url,username,passenv) -> DataFrame:
+    def get_registry(self,raw_url,username,passenv) -> DataFrame:
         """
         Gets the contents of your private container registry and organizes them into a table.
 
         This function uses "pass" as its password store. It takes your password store path to user password and accesses your password store securely.
         
-        :param url: The registry URL
+        :param raw_url: The registry URL
         :param username: The user account
         :param passenv: The user password environmental variable
         """
         tbl = []
         try:
-            url = url if re.search('/v2', url) else '{}/v2'.format(url)
+            url = raw_url if re.search('/v2', raw_url) else '{}/v2'.format(raw_url)
             # rauth = passenv if os.environ[passenv] is None else os.environ[passenv]
             rauth = os.error('Env returned null...') if re.search(passenv,os.environ[passenv]) else os.environ[passenv]
             # print('Docker Credential Token: {}\n'.format(rauth))
@@ -65,7 +67,9 @@ class registry(object):
         except req.exceptions.TooManyRedirects as err:
             print('{}'.format(err))
         except req.exceptions.ConnectionError as err:
-            print('{}'.format(err))
+            print('\nSorry, unable to connect to {}.\n\n{}'.format(raw_url,err))
+            # if re.search('timed out', str(err)):
+            #     raise Timeout(f"Time out error...\n\n{err}")        
         except req.exceptions.URLRequired as err:
             print('{}'.format(err))
         except req.exceptions.StreamConsumedError as err:
@@ -77,11 +81,11 @@ class registry(object):
         except req.exceptions.RequestException as err:
             print('{}'.format(err))
         except req.exceptions.Timeout as err:
-            print('{}'.format(err))
+            print('\nI\'m so sorry but the server request timed out...\n\n{}'.format(err))
         except OSError as err:
-            print('Their was an error in your environment variable; parameter 2. \n{}'.format(err))
+            print('\nTheir was an error in your environment variable; parameter 2. \n{}'.format(err))
         except KeyError as err:
-            print(f'The environment variable {err} does not match any found in our system.')
+            print(f'\nThe environment variable {err} does not match any found in our system.\n')
     #####################################################################
 #########################################################################
 if __name__ == '__main__':
