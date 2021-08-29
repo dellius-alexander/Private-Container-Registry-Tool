@@ -33,16 +33,21 @@ class registry(object):
         :param passenv: the private registry password store token environment variable
         :param passwd: the base64 encoded password string
         """
-        raw_url = os.environ[raw_url]
-        username = os.environ[username]
-        passenv = os.environ[passenv]
-        # print('URL: {}\nUSER: {}\nPASSENV: {}\n'.format(raw_url,username,passenv))
-        self.raw_url = raw_url
-        self.username = username
-        self.passenv = passenv
-        self.passwd = passwd
-        # print('password: {}'.format(passwd))
-        # super().__init__()
+        try:
+            raw_url = os.environ[raw_url]
+            username = os.environ[username]
+            passenv = os.environ[passenv]
+            # print('URL: {}\nUSER: {}\nPASSENV: {}\n'.format(raw_url,username,passenv))
+            self.raw_url = raw_url
+            self.username = username
+            self.passenv = passenv
+            self.passwd = passwd
+            # print('password: {}'.format(passwd))
+            # super().__init__()
+        except OSError as err:
+            print('\nTheir was an error in your environment variable; parameter 2. \n{}'.format(err))
+        except Exception as err: # last line of defense
+            print('\nAn exception has occured.\n{}'.format(err))
 
     #####################################################################    
     def get_registry(self,raw_url=None,username=None,passenv=None) -> DataFrame:
@@ -113,6 +118,7 @@ class registry(object):
             print(f'\nThe environment variable {err} does not match any found in our system.\n')
         except Exception as err: # last line of defense
             print('\nAn exception has occured.\n\n{}'.format(err))
+            
     #####################################################################
 #########################################################################
 if __name__ == '__main__':
