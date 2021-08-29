@@ -13,7 +13,7 @@ from getpass import getpass
 
 
 # TODO: setup GUI to get input and display table of results; 
-# See kivy for GUI: https://kivy.org/doc/stable/gettingstarted/installation.html
+# See kivy for GUI: https://kivy.org/doc/stable/
 # TODO: install password store and configure client environment to use password store
 # TODO: install docker credentials helper in password store
 
@@ -103,9 +103,7 @@ class registry(object):
         except req.exceptions.TooManyRedirects as err:
             print('{}'.format(err))
         except req.exceptions.ConnectionError as err:
-            print('\nSorry, unable to connect to {}.\n\n{}'.format(raw_url,err))
-            # if re.search('timed out', str(err)):
-            #     raise Timeout(f"Time out error...\n\n{err}")        
+            print('\nSorry, unable to connect to {}.\n\n{}'.format(raw_url,err))     
         except req.exceptions.URLRequired as err:
             print('{}'.format(err))
         except req.exceptions.StreamConsumedError as err:
