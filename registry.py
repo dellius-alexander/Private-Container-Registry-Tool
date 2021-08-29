@@ -1,12 +1,10 @@
 import os
-import subprocess
+import re
+import base64
+import subprocess as sp
 import requests as req
 from pandas import DataFrame
 from getpass import getpass
-import re
-import time
-
-from requests.exceptions import Timeout
 
 # TODO: setup GUI to get input and display table of results; 
 # See kivy for GUI: https://kivy.org/doc/stable/gettingstarted/installation.html
@@ -16,7 +14,13 @@ from requests.exceptions import Timeout
 
 class registry(object):
     #####################################################################
-    def __init__(self, raw_url=None,username=None,passenv=None,passwd=str) -> None:
+    def __init__(self, raw_url=None,username=None,passenv=None,passwd=None or str) -> None:
+        """
+        :param raw_url: The registry URL
+        :param username: The user account
+        :param passenv: The user password environmental variable
+        :param passwd: the base64 encoded password string
+        """
         self.url = raw_url
         self.username = username
         self.passenv = passenv
@@ -39,10 +43,10 @@ class registry(object):
         try:
             url = raw_url if re.search('/v2', raw_url) else '{}/v2'.format(raw_url)
             # rauth = passenv if os.environ[passenv] is None else os.environ[passenv]
-            rauth = os.error('Env returned null...') if re.search(passenv,os.environ[passenv]) else os.environ[passenv]
+            rauth = passenv if re.search('docker-credential-helpers',passenv) else os.environ[passenv]
             # print('Docker Credential Token: {}\n'.format(rauth))
             # we are using a password store to access passwords on needed
-            passwd = subprocess.check_output(["pass", rauth])
+            passwd = sp.check_output(["pass", rauth])
             passwd = passwd.decode("utf-8")
             # username = input("Enter Username: ")
             # passw = getpass("Enter Password: ")
@@ -63,7 +67,7 @@ class registry(object):
             # print(tbl)
             df = DataFrame(data=tbl)
             print('\n{}\n'.format(df))
-            # return df
+            return df
         except req.exceptions.TooManyRedirects as err:
             print('{}'.format(err))
         except req.exceptions.ConnectionError as err:
@@ -86,8 +90,13 @@ class registry(object):
             print('\nTheir was an error in your environment variable; parameter 2. \n{}'.format(err))
         except KeyError as err:
             print(f'\nThe environment variable {err} does not match any found in our system.\n')
+        except Exception as err: # last line of defense
+            print('\nAn uncaught exception has occured.\n')
     #####################################################################
 #########################################################################
 if __name__ == '__main__':
     # Gets a table of your private registry objects
-    registry().get_registry('https://registry.dellius.app',"dalexander","PRIVATE_REGISTRY_AUTH")
+    usr = os.environ['PRIVATE_REGISTRY_USER']
+    envpass = os.environ['PRIVATE_REGISTRY_AUTH']
+    reg = registry()
+    reg.get_registry('https://registry.dellius.app',usr,envpass)
