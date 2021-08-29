@@ -14,14 +14,30 @@ from getpass import getpass
 
 class registry(object):
     #####################################################################
-    def __init__(self, raw_url=None,username=None,passenv=None,passwd=None or str) -> None:
+    def __init__(self, raw_url=None or str,username=None or str,passenv=None or str,passwd=None or str) -> None:
         """
-        :param raw_url: The registry URL
-        :param username: The user account
-        :param passenv: The user password environmental variable
+        ## Docker Private Registry Tool:
+
+        Interact with your private docker registry using this tool.  
+
+        - access registry
+        - print contents of private registry
+
+        #### Create 3 environmentals in on your system for 
+        - the private registry url environment variable
+        - the private registry username environment variable
+        - the private registry password store token environment variable
+
+        :param raw_url: the private registry url environment variable
+        :param username: the private registry username environment variable
+        :param passenv: the private registry password store token environment variable
         :param passwd: the base64 encoded password string
         """
-        self.url = raw_url
+        raw_url = os.environ[raw_url]
+        username = os.environ[username]
+        passenv = os.environ[passenv]
+        # print('URL: {}\nUSER: {}\nPASSENV: {}\n'.format(raw_url,username,passenv))
+        self.raw_url = raw_url
         self.username = username
         self.passenv = passenv
         self.passwd = passwd
@@ -29,18 +45,23 @@ class registry(object):
         # super().__init__()
 
     #####################################################################    
-    def get_registry(self,raw_url,username,passenv) -> DataFrame:
+    def get_registry(self,raw_url=None,username=None,passenv=None) -> DataFrame:
         """
         Gets the contents of your private container registry and organizes them into a table.
 
         This function uses "pass" as its password store. It takes your password store path to user password and accesses your password store securely.
         
-        :param raw_url: The registry URL
-        :param username: The user account
-        :param passenv: The user password environmental variable
+        :param raw_url: the private registry url environment variable
+        :param username: the private registry username environment variable
+        :param passenv: the private registry password store token environment variable
         """
         tbl = []
+
+        raw_url = self.raw_url if raw_url is None else os.environ[raw_url]
+        username = self.username if username is None else os.environ[username]
+        passenv = self.passenv if passenv is None else os.environ[passenv]
         try:
+            ##############################################################
             url = raw_url if re.search('/v2', raw_url) else '{}/v2'.format(raw_url)
             # rauth = passenv if os.environ[passenv] is None else os.environ[passenv]
             rauth = passenv if re.search('docker-credential-helpers',passenv) else os.environ[passenv]
@@ -91,12 +112,17 @@ class registry(object):
         except KeyError as err:
             print(f'\nThe environment variable {err} does not match any found in our system.\n')
         except Exception as err: # last line of defense
-            print('\nAn uncaught exception has occured.\n')
+            print('\nAn exception has occured.\n\n{}'.format(err))
     #####################################################################
 #########################################################################
 if __name__ == '__main__':
+    # Create 3 environmentals in on your system for 
+    # - the private registry url
+    # - the private registry username
+    # - the private registry password store token
     # Gets a table of your private registry objects
-    usr = os.environ['PRIVATE_REGISTRY_USER']
-    envpass = os.environ['PRIVATE_REGISTRY_AUTH']
-    reg = registry()
-    reg.get_registry('https://registry.dellius.app',usr,envpass)
+    url = 'PRIVATE_REGISTRY_URL'
+    usr = 'PRIVATE_REGISTRY_USER'
+    envpass = 'PRIVATE_REGISTRY_AUTH'
+    reg = registry(url,usr,envpass)
+    reg.get_registry()
